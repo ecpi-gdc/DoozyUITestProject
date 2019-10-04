@@ -72,7 +72,7 @@ namespace Doozy.Engine.Progress
         private float m_targetValue;
 
         /// <summary> Internal variable used to lower the string operations memory allocations </summary>
-        private StringBuilder m_stringBuilder;
+        private StringBuilder m_stringBuilder = new StringBuilder();
         
         #endregion
 

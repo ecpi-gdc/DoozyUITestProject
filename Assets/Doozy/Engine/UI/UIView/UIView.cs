@@ -527,7 +527,7 @@ namespace Doozy.Engine.UI
             if (DeselectAnyButtonSelectedOnHide)              //check that the deselect any button on HIDE option is enabled
                 UnityEventSystem.SetSelectedGameObject(null); //clear any selection
         }
-        
+
         private void Initialize()
         {
             m_childUIButtons = GetComponentsInChildren<UIButton>();
@@ -602,7 +602,7 @@ namespace Doozy.Engine.UI
             else if (DeselectAnyButtonSelectedOnShow)                   //check that the deselect any button on SHOW option is enabled
                 UnityEventSystem.SetSelectedGameObject(null);           //clear any selection
         }
-        
+
         private void StopHide()
         {
             if (m_hideCoroutine == null) return;
@@ -653,7 +653,7 @@ namespace Doozy.Engine.UI
 
             ShowView(viewCategory, viewName, instantAction);
         }
-        
+
         /// <summary> Hide all the UIViews with the passed view category and view name int the NEXT FRAME</summary>
         /// <param name="viewCategory"> UIView category </param>
         /// <param name="viewName"> UIView name (found in the view category) </param>
@@ -664,7 +664,7 @@ namespace Doozy.Engine.UI
 
             HideView(viewCategory, viewName, instantAction);
         }
-        
+
         private IEnumerator ShowEnumerator(bool instantAction)
         {
 //            yield return null; //skip a frame
@@ -704,8 +704,7 @@ namespace Doozy.Engine.UI
             Visibility = VisibilityState.Showing; //update the visibility state
             if (!VisibleViews.Contains(this)) VisibleViews.Add(this);
 
-            ShowBehavior.OnStart.Invoke(gameObject, !instantAction, !instantAction);
-
+            if (instantAction) ShowBehavior.OnStart.Invoke(gameObject, false, false);
             NotifySystemOfTriggeredBehavior(UIViewBehaviorType.Show); //send the global events
 
             if (HideProgressor != null) HideProgressor.SetValue(0f);
@@ -717,9 +716,18 @@ namespace Doozy.Engine.UI
 
                 float totalDuration = ShowBehavior.Animation.TotalDuration;
                 float elapsedTime = startTime - Time.realtimeSinceStartup;
+                float startDelay = ShowBehavior.Animation.StartDelay;
+                bool invokedOnStart = false;
                 while (elapsedTime <= totalDuration) //wait for seconds realtime (ignore Unity's Time.Timescale)
                 {
                     elapsedTime = Time.realtimeSinceStartup - startTime;
+
+                    if (!invokedOnStart && elapsedTime > startDelay)
+                    {
+                        ShowBehavior.OnStart.Invoke(gameObject);
+                        invokedOnStart = true;
+                    }
+
                     VisibilityProgress = elapsedTime / totalDuration;
                     yield return null;
                 }
@@ -781,7 +789,7 @@ namespace Doozy.Engine.UI
             if (VisibleViews.Contains(this)) VisibleViews.Remove(this);
             if (m_initialized)
             {
-                HideBehavior.OnStart.Invoke(gameObject, !instantAction, !instantAction);
+                if (instantAction) HideBehavior.OnStart.Invoke(gameObject, false, false);
                 NotifySystemOfTriggeredBehavior(UIViewBehaviorType.Hide); //send the global events
             }
 
@@ -792,9 +800,18 @@ namespace Doozy.Engine.UI
 
                 float totalDuration = HideBehavior.Animation.TotalDuration;
                 float elapsedTime = startTime - Time.realtimeSinceStartup;
+                float startDelay = HideBehavior.Animation.StartDelay;
+                bool invokedOnStart = false;
                 while (elapsedTime <= totalDuration) //wait for seconds realtime (ignore Unity's Time.Timescale)
                 {
                     elapsedTime = Time.realtimeSinceStartup - startTime;
+
+                    if (!invokedOnStart && elapsedTime > startDelay)
+                    {
+                        HideBehavior.OnStart.Invoke(gameObject);
+                        invokedOnStart = true;
+                    }
+
                     VisibilityProgress = 1 - elapsedTime / totalDuration; //operation is reversed in hide than in show
                     yield return null;
                 }

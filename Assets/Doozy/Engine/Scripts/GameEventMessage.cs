@@ -218,6 +218,7 @@ namespace Doozy.Engine
         private static void SendEvent(GameEventMessage gameEventMessage)
         {
             GameEventManager.ProcessGameEvent(gameEventMessage);
+            Send(gameEventMessage.EventName, gameEventMessage);
             Send(gameEventMessage);
         }
 

@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Doozy.Engine.Utils;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -341,9 +342,22 @@ namespace Doozy.Engine.Soundy
             if (DatabaseNames == null) DatabaseNames = new List<string>();
             if (SoundDatabases == null) SoundDatabases = new List<SoundDatabase>();
             DatabaseNames.Clear();
+            bool foundNullDatabaseReference = false;
             foreach (SoundDatabase database in SoundDatabases)
+            {
+                if (database == null)
+                {
+                    foundNullDatabaseReference = true;
+                    continue;
+                }
                 DatabaseNames.Add(database.DatabaseName);
+            }
             DatabaseNames.Sort();
+            if (foundNullDatabaseReference)
+            {
+                SoundDatabases = SoundDatabases.Where(soundDatabase => soundDatabase != null).ToList();
+                SetDirty(false);
+            }
             SetDirty(saveAssets);
         }
 

@@ -34,7 +34,9 @@ namespace Doozy.Engine.Utils
             if (string.IsNullOrEmpty(resourcesPath)) return null;
             if (string.IsNullOrEmpty(fileName)) return null;
             // ReSharper disable once SuspiciousTypeConversion.Global
-            if (!resourcesPath[resourcesPath.Length - 1].Equals(@"\")) resourcesPath += @"\";
+//            if (!resourcesPath[resourcesPath.Length - 1].Equals(@"\")) resourcesPath += @"\";
+//            resourcesPath = resourcesPath.Replace(@"\", "/");
+            resourcesPath = CleanPath(resourcesPath);
 
             var obj = (T) Resources.Load(fileName, typeof(T));
 
@@ -56,10 +58,21 @@ namespace Doozy.Engine.Utils
         {
             if (string.IsNullOrEmpty(resourcesPath)) return null;
             if (string.IsNullOrEmpty(fileName)) return null;
+            resourcesPath = CleanPath(resourcesPath);
             // ReSharper disable once SuspiciousTypeConversion.Global
-            if (!resourcesPath[resourcesPath.Length - 1].Equals(@"\")) resourcesPath += @"\";
+//            if (!resourcesPath[resourcesPath.Length - 1].Equals(@"\")) resourcesPath += @"\";
+//            resourcesPath = resourcesPath.Replace(@"\", "/");
 
             return (T) Resources.Load(resourcesPath + fileName, typeof(T));
+        }
+
+        public static string CleanPath(string path)
+        {
+            // ReSharper disable once SuspiciousTypeConversion.Global
+            if (!path[path.Length - 1].Equals(@"\")) path += @"\";
+            path = path.Replace(@"\\", @"\");
+            path = path.Replace(@"\", "/");
+            return path;
         }
 
 #if UNITY_EDITOR
@@ -72,9 +85,10 @@ namespace Doozy.Engine.Utils
         {
             if (string.IsNullOrEmpty(relativePath)) return null;
             if (string.IsNullOrEmpty(fileName)) return null;
+            relativePath = CleanPath(relativePath);
             // ReSharper disable once SuspiciousTypeConversion.Global
-            if (!relativePath[relativePath.Length - 1].Equals(@"\")) relativePath += @"\";
-            relativePath = relativePath.Replace(@"\\", @"\");
+//            if (!relativePath[relativePath.Length - 1].Equals(@"\")) relativePath += @"\";
+//            relativePath = relativePath.Replace(@"\\", @"\");
             var asset = ScriptableObject.CreateInstance<T>();
             AssetDatabase.CreateAsset(asset, relativePath + fileName + extension);
             EditorUtility.SetDirty(asset);
@@ -89,7 +103,8 @@ namespace Doozy.Engine.Utils
             if (string.IsNullOrEmpty(relativePath)) return;
             if (string.IsNullOrEmpty(fileName)) return;
             // ReSharper disable once SuspiciousTypeConversion.Global
-            if (!relativePath[relativePath.Length - 1].Equals(@"\")) relativePath += @"\";
+//            if (!relativePath[relativePath.Length - 1].Equals(@"\")) relativePath += @"\";
+            relativePath = CleanPath(relativePath);
             if (!AssetDatabase.MoveAssetToTrash(relativePath + fileName + ".asset")) return;
             if (printDebugMessage) DDebug.Log("The " + fileName + ".asset file has been moved to trash.");
             if (saveAssetDatabase) AssetDatabase.SaveAssets();
@@ -101,7 +116,8 @@ namespace Doozy.Engine.Utils
             if (string.IsNullOrEmpty(filePath)) return null;
             if (string.IsNullOrEmpty(fileName)) return null;
             // ReSharper disable once SuspiciousTypeConversion.Global
-            if (!filePath[filePath.Length - 1].Equals(@"\")) filePath += @"\";
+//            if (!filePath[filePath.Length - 1].Equals(@"\")) filePath += @"\";
+            filePath = CleanPath(filePath);
             return AssetDatabase.LoadAssetAtPath<Texture>(filePath + fileName + fileExtension);
         }
 
@@ -110,7 +126,8 @@ namespace Doozy.Engine.Utils
             if (string.IsNullOrEmpty(filePath)) return null;
             if (string.IsNullOrEmpty(fileName)) return null;
             // ReSharper disable once SuspiciousTypeConversion.Global
-            if (!filePath[filePath.Length - 1].Equals(@"\")) filePath += @"\";
+//            if (!filePath[filePath.Length - 1].Equals(@"\")) filePath += @"\";
+            filePath = CleanPath(filePath);
             return AssetDatabase.LoadAssetAtPath<Texture2D>(filePath + fileName + fileExtension);
         }
 #endif

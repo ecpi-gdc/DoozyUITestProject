@@ -788,8 +788,10 @@ namespace Doozy.Engine.UI
 
             Visibility = VisibilityState.Showing; //update the visibility state
             if (!VisiblePopups.Contains(this)) VisiblePopups.Add(this);
-            ShowBehavior.OnStart.Invoke(gameObject, !instantAction, !instantAction);
+            
+            if(instantAction) ShowBehavior.OnStart.Invoke(gameObject, false, false);
             NotifySystemOfTriggeredBehavior(AnimationType.Show); //send the global events
+            
             if (HideProgressor != null) HideProgressor.SetValue(0f);
 
             float startTime = Time.realtimeSinceStartup;
@@ -799,9 +801,18 @@ namespace Doozy.Engine.UI
 
                 float totalDuration = ShowBehavior.Animation.TotalDuration;
                 float elapsedTime = startTime - Time.realtimeSinceStartup;
+                float startDelay = ShowBehavior.Animation.StartDelay;
+                bool invokedOnStart = false;
                 while (elapsedTime <= totalDuration) //wait for seconds realtime (ignore Unity's Time.Timescale)
                 {
                     elapsedTime = Time.realtimeSinceStartup - startTime;
+                    
+                    if (!invokedOnStart && elapsedTime > startDelay)
+                    {
+                        ShowBehavior.OnStart.Invoke(gameObject);
+                        invokedOnStart = true;
+                    }
+                    
                     VisibilityProgress = elapsedTime / totalDuration;
                     yield return null;
                 }
@@ -869,7 +880,8 @@ namespace Doozy.Engine.UI
 
             StartCoroutine(ExecuteHideDeselectButtonEnumerator());
             Visibility = VisibilityState.Hiding; //update the visibility state
-            HideBehavior.OnStart.Invoke(gameObject, !instantAction, !instantAction);
+            
+            if (instantAction) HideBehavior.OnStart.Invoke(gameObject, false, false);
             NotifySystemOfTriggeredBehavior(AnimationType.Hide); //send the global events
 
             float startTime = Time.realtimeSinceStartup;
@@ -879,9 +891,18 @@ namespace Doozy.Engine.UI
 
                 float totalDuration = HideBehavior.Animation.TotalDuration;
                 float elapsedTime = startTime - Time.realtimeSinceStartup;
+                float startDelay = HideBehavior.Animation.StartDelay;
+                bool invokedOnStart = false;
                 while (elapsedTime <= totalDuration) //wait for seconds realtime (ignore Unity's Time.Timescale)
                 {
                     elapsedTime = Time.realtimeSinceStartup - startTime;
+                    
+                    if (!invokedOnStart && elapsedTime > startDelay)
+                    {
+                        HideBehavior.OnStart.Invoke(gameObject);
+                        invokedOnStart = true;
+                    }
+                    
                     VisibilityProgress = 1 - elapsedTime / totalDuration; //operation is reversed in hide than in show
                     yield return null;
                 }
